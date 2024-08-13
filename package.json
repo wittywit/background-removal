@@ -1,0 +1,19 @@
+{
+  "name": "p5",
+  "version": "1.0.0",
+  "main": "ml5.min.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.14",
+    "qrcode": "^1.5.4",
+    "uuid": "^10.0.0"
+  }
+}
