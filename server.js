@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const QRCode = require('qrcode');
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -11,6 +12,12 @@ const port = 3000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 app.use(express.static('public'));
+
+// Ensure the uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
 
 // Set up Multer for file uploads
 const storage = multer.diskStorage({
@@ -39,6 +46,10 @@ app.post('/upload', upload.single('image'), (req, res) => {
 app.post('/generate-qr', (req, res) => {
   const imageUrl = req.body.imageUrl;
 
+  if (!imageUrl) {
+    return res.status(400).send('No image URL provided.');
+  }
+
   QRCode.toDataURL(imageUrl, (err, url) => {
     if (err) {
       console.error('Error generating QR Code:', err);
@@ -52,16 +63,20 @@ app.post('/generate-qr', (req, res) => {
 app.post('/send-email', (req, res) => {
   const { email, imageUrl, qrCodeUrl } = req.body;
 
+  if (!email || !imageUrl || !qrCodeUrl) {
+    return res.status(400).send('Missing email, image URL, or QR code URL.');
+  }
+
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'mymailsendertests@gmail.com',// Replace with your email
-      pass: 'nknm rgru mxrt ksad',// Replace with your App Password   
+      user: process.env.EMAIL_USER || 'mymailsendertests@gmail.com', // Replace with your email
+      pass: process.env.EMAIL_PASS || 'nknm rgru mxrt ksad', // Replace with your App Password   
     },
   });
 
   const mailOptions = {
-    from: 'mymailsendertests@gmail.com', // Replace with your email
+    from: process.env.EMAIL_USER || 'mymailsendertests@gmail.com', // Replace with your email
     to: email,
     subject: 'Your Generated Image and QR Code',
     html: `
@@ -89,16 +104,3 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
-
-
-
-
-
-
-
-
-
-
-
-      
-    
